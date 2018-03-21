@@ -33,15 +33,24 @@ public class Split {
 					fileRead = fileRead + input.readLine();
 					tokenize = fileRead.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 					System.out.println("line size = "+tokenize.length);
-				}		
-				
-				if (tokenize[14].toLowerCase().contains("wagga")){ //shipping method is wagga
-					waggaInput.write(fileRead); //write line to wagga file
-				} else {
-					localInput.write(fileRead); //write line to local file
 				}
 				
-				fileRead = input.readLine();
+				String orderID = tokenize[0];							//OrderID
+				String shippingMethod = tokenize[14];					//shipping method that was used
+				
+				if (shippingMethod.toLowerCase().contains("wagga")){ //shipping method is wagga
+					while(tokenize[0].equals(orderID)){
+						waggaInput.write(fileRead); //write line to wagga file
+						fileRead = input.readLine();
+					}
+				} else {
+					while(tokenize[0].equals(orderID)){
+						localInput.write(fileRead); //write line to local file
+						fileRead = input.readLine();
+					}
+				}
+				
+				
 			}
 
 			input.close();
