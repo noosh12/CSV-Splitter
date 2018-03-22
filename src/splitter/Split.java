@@ -18,44 +18,74 @@ public class Split {
 			BufferedWriter waggaInput = new BufferedWriter(new FileWriter("input_wagga.csv", false));
 
 			String fileRead = input.readLine(); // Headers
+			waggaInput.write(fileRead); //write line to wagga file
+			localInput.write(fileRead); //write line to local file
+
+			
 			fileRead = input.readLine(); //first real line
 			
+			String orderID, shippingMethod;
+			String oldOrderID = "first";
+			
+			boolean firstLine = true;
+			boolean wagga = false;
+
 
 			while (fileRead != null)
 			{
+				
 				// split input line on commas, except those between quotes ("")
 				String[] tokenize = fileRead.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-				
 				
 				//Fixing lines that are incorrectly ended prematurely due to line break in fields like 'notes'
 				// System.out.print("line size = "+tokenize.length+"   ");
 				while(tokenize.length<56){
 					fileRead = fileRead + input.readLine();
 					tokenize = fileRead.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-					System.out.println("line size = "+tokenize.length);
 				}
 				
-				String orderID = tokenize[0];							//OrderID
-				String shippingMethod = tokenize[14];					//shipping method that was used
+				orderID = tokenize[0];							//OrderID
+				shippingMethod = tokenize[14];					//shipping method that was used
 				
-				if (shippingMethod.toLowerCase().contains("wagga")){ //shipping method is wagga
-					while(tokenize[0].equals(orderID)){
-						waggaInput.write(fileRead); //write line to wagga file
-						fileRead = input.readLine();
-					}
+				if(orderID.equals(oldOrderID)){
+					firstLine = false;
 				} else {
-					while(tokenize[0].equals(orderID)){
-						localInput.write(fileRead); //write line to local file
-						fileRead = input.readLine();
-					}
+					firstLine = true;
 				}
 				
+
+				if(firstLine){
+					if(shippingMethod.toLowerCase().contains("wagga")){
+						wagga = true;
+						waggaInput.newLine();
+						waggaInput.write(fileRead); //write line to wagga file
+					} else {
+						wagga = false;
+						localInput.newLine();
+						localInput.write(fileRead); //write line to local file
+					}
+					oldOrderID = orderID;
+					fileRead = input.readLine();
+					continue;
+				}
+
 				
+				if(wagga){
+					waggaInput.newLine();
+					waggaInput.write(fileRead); //write line to local file
+				} else {
+					localInput.newLine();
+					localInput.write(fileRead); //write line to local file
+				}
+
+				oldOrderID = orderID;
+				fileRead = input.readLine();
 			}
 
 			input.close();
 			localInput.close();
 			waggaInput.close();
+			System.out.println("done!");
 		}
 		catch (FileNotFoundException fnfe)
 		{
